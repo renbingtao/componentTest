@@ -1,0 +1,125 @@
+{
+  "data": {
+    "EnabledOutSend": false,
+    "FilesInfo": [],
+    "FoldersInfo": [
+      {
+        "FolderNamePath": "PublicRoot\\博监附件\\差异调整\\美高梅金殿超濠股份有限公司\\博彩桌\\rbt-20240920-0948\\DICJ批覆文件\\历史文件",
+        "FolderId": 821,
+        "ParentFolderId": 820,
+        "FolderCode": "",
+        "FolderSortOrder": 0,
+        "FolderName": "历史文件",
+        "FolderPath": "1\\469\\812\\813\\814\\818\\820\\821",
+        "FolderSize": 0,
+        "FolderMaxFolderSize": 0,
+        "FolderAlertSize": 0,
+        "FolderMaxFileSize": 0,
+        "FolderForbiddenFileExtensions": null,
+        "FolderChildFoldersCount": 0,
+        "FolderChildFilesCount": 0,
+        "SecurityLevelId": 0,
+        "FolderState": 0,
+        "FolderLockCount": 0,
+        "FolderCreateTime": "2024-09-20 12:14:09",
+        "FolderCreateOperator": 2,
+        "FolderCreateOperatorName": "Administrator",
+        "FolderModifyTime": "2024-09-20 12:14:09",
+        "FolderModifyOperator": 2,
+        "FolderModifyOperatorName": "Administrator",
+        "FolderArchiveTime": "0001-01-01 00:00:00",
+        "FolderArchiveOperator": 0,
+        "FolderPermData": 2140907969,
+        "FolderOtherValue": null,
+        "FolderDeletedTime": "0001-01-01 00:00:00",
+        "FolderDeletedBy": null,
+        "FolderRelativePath": null,
+        "FolderType": 1,
+        "FolderRemark": "",
+        "IsDeleted": false,
+        "RecentPathOne": null,
+        "RecentPathTwo": null,
+        "RecentPathThree": null,
+        "RecentPathFour": null,
+        "RecentPathFive": null,
+        "IsFavorite": false,
+        "SharePermission": 0,
+        "DiscussCount": 0
+      }
+    ],
+    "InfoItems": [
+      {
+        "DataType": "docName",
+        "Name": "basic:name",
+        "Remark": null,
+        "Title": "name"
+      },
+      {
+        "DataType": "datetime",
+        "Name": "basic:modifyTime",
+        "Remark": null,
+        "Title": "modifyTime"
+      },
+      {
+        "DataType": "string",
+        "Name": "basic:editor",
+        "Remark": null,
+        "Title": "editor"
+      },
+      {
+        "DataType": "fileSize",
+        "Name": "basic:size",
+        "Remark": null,
+        "Title": "size"
+      },
+      {
+        "DataType": "version",
+        "Name": "basic:version",
+        "Remark": null,
+        "Title": "version"
+      }
+    ],
+    "IsArchive": false,
+    "MustOnline": true,
+    "SecurityEnable": false,
+    "Settings": {
+      "PageNum": 1,
+      "PageSize": 100,
+      "TotalCount": 6,
+      "ViewMode": null,
+      "DocViewId": 0
+    },
+    "ThisFolder": {
+      "Id": 820,
+      "Name": "DICJ批覆文件",
+      "Size": 1538334,
+      "AlertSize": 0,
+      "ForbiddenFileExtensions": "",
+      "MaxFolderSize": 0,
+      "MaxFileSize": 0,
+      "CreateTime": "2024-09-20 09:48:04",
+      "CreatorId": 68,
+      "CreatorName": "金蝶稅收",
+      "Code": null,
+      "State": 0,
+      "ModifyTime": "2024-09-20 12:14:09",
+      "SecurityLevel": 0,
+      "ChildFolderCount": 1,
+      "ChildFileCount": 5,
+      "Path": "1\\469\\812\\813\\814\\818\\820",
+      "ParentFolderName": "rbt-20240920-0948",
+      "ParentFolderId": 818,
+      "Remark": null,
+      "Permission": 2140907969,
+      "NeedDownloadDesc": "",
+      "FolderType": 1,
+      "UploadType": 0,
+      "isfavorite": false,
+      "EditorName": "Administrator"
+    }
+  },
+  "dataDescription": "",
+  "result": 0,
+  "message": "",
+  "clientId": null
+}

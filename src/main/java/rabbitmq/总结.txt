@@ -1,0 +1,120 @@
+
+默认采用轮询分发的模式
+默认情况下消息需要确认，否则mq认为消费失败，会重新入队。默认超时事件30min
+消息可以设置为持久化，但有短暂窗口还是会丢消息
+公平分发，即消费者确认后，mq才会给他发送下一个消息
+发布/订阅模式：一个生产者，多个消费者
+生产者不是直接把消息发送到队列，而是发送到交换机，交换机再决定把消息发送到队列。交换机的类型决定了消息应该被添加到特定队列，或是添加到多个队列，或是丢弃
+交换机类型： direct, topic, headers , fanout
+
+rabbitmqctl list_exchanges查看有交换机
+root@rbt-computer:~# rabbitmqctl list_exchanges
+Listing exchanges for vhost / ...
+name    type
+amq.fanout      fanout
+amq.topic       topic
+amq.rabbitmq.trace      topic
+amq.headers     headers
+amq.direct      direct
+amq.match       headers
+        direct
+
+connection是线程安全的，但channel不是线程安全的
+1. 队列持久化‌	确保队列元数据在服务器重启后保留	durable=true
+2. 消息持久化‌	标记消息需要写入磁盘	delivery_mode=2
+3. 交换器持久化‌	确保交换器元数据在重启后保留	durable=true
+
+持久化
+在 RabbitMQ 中设置持久化需要同时配置三个关键环节，以确保消息在服务器重启后不会丢失。
+
+ 将交换器、队列、消息都设置了持久化之后就能百分之百保证数据不丢失了吗
+ 答案是否定的.
+ 1. 从消费者来说,如果在订阅消费队列时将autoAck参数设置为true,那么当消费者接收到相关消息之后,还没来得及处理就宕机了,这样也算数据居丢失.这种情况很好解决,将autoAck参数设置为false,并进⾏⼿动确认,详细可以参考[消息确认]章节.
+ 2. 在持久化的消息正确存⼊RabbitMQ之后,还需要有⼀段时间(虽然很短,但是不可忽视)才能存⼊磁盘中.RabbitMQ并不会为每条消息都进⾏同步存盘(调⽤内核的fsync⽅法)的处理,可能仅仅保存到操作系统缓存之中⽽不是物理磁盘之中.如果在这段时间内RabbitMQ服务节点发⽣了宕机、重启等异常情况,消息保存还没来得及落盘,那么这些消息将会丢失.
+如何解决？
+可以在发送端引⼊事务机制或者【发送⽅确认】机制来保证消息已经正确地发送并存储⾄RabbitMQ中
+
+channel.queueDeclare()
+定义队列时的属性：是否持久化，是否排他，是否自动删除。排他=是时，只有创建队列的连接可以消费或管理（删除、绑定等）该队列，但其他连接可以发送消息
+
+channel.basicPublish("", "hello", null, message.getBytes());
+当调用上面的代码时，使用的是默认交换机（第一个参数为交换机，空字符串对应默认或无名交换机），类型为direct exchange，消息将根据路由key被路由到特定的队列
+
+channel.basicConsume(RPC_QUEUE_NAME, true, deliverCallback, (consumerTag -> {}));
+调用上述代码为消费消息，第二个参数为是否自动确认（默认true），开启时，只要消息被投递给消费者，会立即从队列中删除，无论消息处理成功或失败（比如程序崩溃）
+
+channel.exchangeDeclare("logs", "fanout", true);
+通过上面的代码手动创建一个名为logs的fanout（扇型）类型的交换机，这种类型的交换机会把消息路由到它绑定的所有队列（方法调用时传一个特定的队列名也没用）。
+
+临时队列
+对于日志记录这种场景，我们只对当前消息感兴趣，可以使用临时队列
+创建一个非持久化、独占、自动删除且具有生成名称的队列：
+String queueName = channel.queueDeclare().getQueue();
+
+创建好交换机和队列后，将两个绑定
+channel.queueBind(queueName, "logs", "");
+一个交换机的多个规则都匹配到了同一个队列，那么只会发送到队列一次而不是多次
+
+direct exchange
+直接交换背后的路由算法很简单 —— 消息会发送到那些绑定键与消息的路由键（routingKey）完全匹配的队列中
+定义一个直接交换机
+channel.exchangeDeclare(EXCHANGE_NAME, "direct");
+发送消息
+channel.basicPublish(EXCHANGE_NAME, severity, null, message.getBytes());
+'severity' 可以是 info, warning, 或 error
+订阅
+String queueName = channel.queueDeclare().getQueue();
+for(String severity : argv){
+  channel.queueBind(queueName, EXCHANGE_NAME, severity);
+}
+
+topic exchange
+发送至主题交换器的消息不能设置任意的路由键——它必须是一个由点分隔的单词列表。示例有：stock.usd.nyse、nyse.vmw、quick.orange.rabbit。路由键中的单词数量可以随意设定，但最多不得超过 255 个字节。绑定键也必须采用相同的格式。
+对于绑定键存在两个重要的特殊情况：
+* （星号）可以替代一个单词。
+# （井号）可以替代零个或多个单词。
+*.orange.*可以匹配quick.orange.rabbit和quick.orange.fox但不能匹配quick.orange.new.rabbit
+lazy.#可以匹配lazy.orange.new.rabbit和lazy.pink.rabbit
+topic交换机和直接交换机的主要区别是支持模糊查询
+
+header 交换机
+不通过路由键匹配，而是通过头部信息来匹配，适用于复杂条件匹配
+生产者
+Map m = new HashMap();
+m.put("a","b");
+m.put("c","d");
+AMQP.BasicProperties pro = new AMQP.BasicProperties.Builder().headers(m).build();
+channel.basicPublish(EXCHANGE_NAME,"",pro,message.getBytes("UTF-8"));
+消费者
+Map m = new HashMap();
+m.put("a","b");
+m.put("c","d");
+m.put("x-match","all"); //all表示两个条件都要满足，any表示满足任意一个
+channel.queueBind(QUEUE_NAME,EXCHANGE_NAME,"",m);
+
+RPC
+使用rabbitmq构建一个rpc服务，包含一个客户端和一个可拓展的RPC服务器
+客户端接口
+在返回结果之前，都处于阻塞状态
+FibonacciRpcClient fibonacciRpc = new FibonacciRpcClient();
+String result = fibonacciRpc.call("4");
+回调队列
+客户端发送请求，服务器以相应消息的形式进行回复。为了接收相应，需要在请求中附带一个回调的队列地址，可以使用默认队列
+callbackQueueName = channel.queueDeclare().getQueue();
+BasicProperties props = new BasicProperties
+                            .Builder()
+                            .replyTo(callbackQueueName)
+                            .build();
+channel.basicPublish("", "rpc_queue", props, message.getBytes());
+// ... then code to read a response message from the callback_queue ...
+amqp协议的部分属性
+deliveryMode：用于将消息标记为持久型（值为 2）或临时型（其他任何值）。您可能还记得这个属性是从第二个教程中介绍的。
+contentType：用于描述编码的 MIME 类型。例如，对于常用的 JSON 编码，将此属性设置为“application/json”是一个很好的做法。
+replyTo：通常用于为回调队列命名。
+correlationId：有助于将 RPC 响应与请求相关联。我们将为每条请求设置一个唯一的值。之后，当我们在回调队列中收到消息时，我们会查看这个属性，并根据该属性匹配响应与请求。
+
+Publisher Confirms
+发布者确认功能是 RabbitMQ 的一个扩展，用于实现可靠发布。发布者确认功能是 RabbitMQ 的一个扩展，用于实现可靠发布。当在某个通道上启用发布者确认功能后，客户端发布的消息将由代理进行异步确认，这意味着这些消息已在服务器端得到处理。
+
+
+
