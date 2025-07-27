@@ -44,6 +44,10 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.1'
 
     implementation 'com.rabbitmq:amqp-client:5.23.0' // 当前最新稳定版本为示例
+
+    implementation group: 'org.elasticsearch.client', name: 'elasticsearch-rest-client', version: '7.10.2'
+    implementation group: 'org.elasticsearch.client', name: 'elasticsearch-rest-high-level-client', version: '7.10.2'
+
 }
 
 test {
