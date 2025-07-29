@@ -3,12 +3,23 @@ package zk;
 import org.apache.zookeeper.*;
 import org.apache.zookeeper.data.Stat;
 
+import java.util.concurrent.CountDownLatch;
+
 public class ZKClient {
 
     public static void main(String[] args) throws Exception {
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+        //new ZooKeeper这个代码是异步执行的，并不是阻塞的，所以这里需要一个CountDownLatch来阻塞
         try (ZooKeeper zk = new ZooKeeper("localhost:2181", 3000, event -> {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
             System.out.println("listen");
+            countDownLatch.countDown();
         })) {
+            countDownLatch.await();
             //判断节点是否存在,不存在返回null
             Stat exists = zk.exists("/test3", null);
             System.out.println("exists:" + exists);
