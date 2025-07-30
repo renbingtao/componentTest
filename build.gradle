@@ -50,6 +50,9 @@ dependencies {
 
     implementation group: 'org.apache.zookeeper', name: 'zookeeper', version: '3.5.7'
 
+    implementation 'org.apache.curator:curator-framework:4.0.0'
+    implementation 'org.apache.curator:curator-recipes:4.0.0'
+
 }
 
 test {
