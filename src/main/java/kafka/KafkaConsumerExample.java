@@ -10,12 +10,14 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.Properties;
 
+import static kafka.KafkaProducerExample.KAFKA_IP;
+
 public class KafkaConsumerExample {
     public static void main(String[] args) {
         // 1. 配置消费者属性
         Properties props = new Properties();
         // Kafka 服务器地址
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "172.30.23.131:9092");
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_IP + ":9092");
         // 消费者组 ID（同一组内的消费者分担消费分区）
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "quickstart-group");
         // 键的反序列化器（将字节数组反序列化为 String）
