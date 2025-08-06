@@ -20,9 +20,7 @@ public class Confirm2 {
             channel.exchangeDeclare(TASK_QUEUE_NAME, "fanout", true);
             String message = String.join(" ", "Hello World" + new Date().toString());
             for (int i = 0; i < 10; i++) {
-                channel.basicPublish("", TASK_QUEUE_NAME,
-                        MessageProperties.PERSISTENT_TEXT_PLAIN,
-                        message.getBytes("UTF-8"));
+                channel.basicPublish("", TASK_QUEUE_NAME, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes("UTF-8"));
             }
             //可以执行多个basicPublish后执行一个waitForConfirmsOrDie，则之前发送的多个消息都会被确认，但出错时无法确认是哪一个消息出错了，因此需要全部重新发布
             channel.waitForConfirmsOrDie(5000);

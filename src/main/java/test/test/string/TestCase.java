@@ -48,8 +48,8 @@ public class TestCase {
 
     @Test
     public void test5() {
-        String msg = String.format("ecm-thread-%s-%s", "abc", new Long(444));
-        System.out.println(msg);
+//        String msg = String.format("ecm-thread-%s-%s", "abc", new Long(444));
+//        System.out.println(msg);
     }
 
     @Test

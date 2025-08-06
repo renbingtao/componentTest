@@ -18,7 +18,7 @@ public class EsHttpClient {
         CloseableHttpClient httpClient = HttpClients.createDefault();
 
         // 创建 HTTP GET 请求
-        HttpGet httpGet = new HttpGet("http://localhost:9200");
+        HttpGet httpGet = new HttpGet("http://172.30.23.131:9200");
 
         CloseableHttpResponse response = null;
 

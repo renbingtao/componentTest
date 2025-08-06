@@ -22,9 +22,7 @@ public class SendTest {
 
             String message = String.join(" ", "Hello World" + new Date().toString());
 
-            channel.basicPublish("", TASK_QUEUE_NAME,
-                    MessageProperties.PERSISTENT_TEXT_PLAIN,
-                    message.getBytes("UTF-8"));
+            channel.basicPublish("", TASK_QUEUE_NAME, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes("UTF-8"));
             System.out.println(" [x] Sent '" + message + "'");
         }
     }
