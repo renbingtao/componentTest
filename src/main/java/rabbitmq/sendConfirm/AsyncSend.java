@@ -1,12 +1,13 @@
-package rabbitmq.confirm;
+package rabbitmq.sendConfirm;
 
 import com.rabbitmq.client.*;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
-public class Confirm3 {
+public class AsyncSend {
     private static final String TASK_QUEUE_NAME = "task_queue";
 
     public static void main(String[] argv) throws Exception {
@@ -17,10 +18,11 @@ public class Confirm3 {
             channel.confirmSelect();
             channel.queueDeclare(TASK_QUEUE_NAME, true, false, false, null);
             channel.exchangeDeclare(TASK_QUEUE_NAME, "fanout", true);
-            String message = String.join(" ", "Hello World" + new Date().toString());
+            String message = String.join(" ", "Hello World" + new Date());
 
             //在发布之前，可以通过调用 Channel#getNextPublishSeqNo() 来获取序列号
             long nextNumber = channel.getNextPublishSeqNo();
+            System.out.println(nextNumber);
 
             //还需要将序列号和消息的映射关系记录
             ConcurrentNavigableMap<Long, String> outstandingConfirms = new ConcurrentSkipListMap<>();
@@ -48,7 +50,7 @@ public class Confirm3 {
                 cleanOutstandingConfirms.handle(sequenceNumber, multiple);
             };
 
-            channel.basicPublish("", TASK_QUEUE_NAME, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes("UTF-8"));
+            channel.basicPublish("", TASK_QUEUE_NAME, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes(StandardCharsets.UTF_8));
 
             //处理发布者确认操作（异步进行）
             //共有 2 个回调函数：一个用于处理已确认的消息，另一个用于处理被拒绝的消息（这些消息可能会被代理服务器视为已丢失）。
