@@ -5,19 +5,24 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import wsl.WslIpFetcher;
 
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Properties;
 
-import static kafka.KafkaProducerExample.KAFKA_IP;
+import static kafka.KafkaProducerExample.KAFKA_TOPIC;
 
 public class KafkaConsumerExample {
-    public static void main(String[] args) {
+
+    public static void main(String[] args) throws Exception {
+
+        String wslIpAddress = WslIpFetcher.getWslIpAddress();
+
         // 1. 配置消费者属性
         Properties props = new Properties();
         // Kafka 服务器地址
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_IP + ":9092");
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, wslIpAddress + ":9092");
         // 消费者组 ID（同一组内的消费者分担消费分区）
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "quickstart-group");
         // 键的反序列化器（将字节数组反序列化为 String）
@@ -32,11 +37,10 @@ public class KafkaConsumerExample {
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
         // 2. 创建消费者实例
-        KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props);
 
-        try {
+        try (KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props)) {
             // 3. 订阅主题（可订阅多个，用集合传入）
-            consumer.subscribe(Collections.singletonList("quickstart-events"));
+            consumer.subscribe(Collections.singletonList(KAFKA_TOPIC));
 
             // 4. 循环拉取消息（长轮询）
             while (true) {
@@ -52,9 +56,6 @@ public class KafkaConsumerExample {
                 //手动提交偏移量
                 consumer.commitSync();
             }
-        } finally {
-            // 5. 关闭消费者（释放资源）
-            consumer.close();
         }
     }
 }

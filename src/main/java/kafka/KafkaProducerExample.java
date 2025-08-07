@@ -5,6 +5,8 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.apache.log4j.Logger;
+import wsl.WslIpFetcher;
 
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
@@ -12,31 +14,36 @@ import java.util.concurrent.Future;
 
 public class KafkaProducerExample {
 
-    public static String KAFKA_IP = "172.31.164.91";
+    private static final Logger logger = Logger.getLogger(KafkaProducerExample.class);
 
-    public static void main(String[] args) {
+    public static String KAFKA_TOPIC = "quickstart-events";
+
+    public static void main(String[] args) throws Exception {
+
+        String wslIpAddress = WslIpFetcher.getWslIpAddress();
 
         Properties props = new Properties();
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, KAFKA_IP + ":9092");
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, wslIpAddress + ":9092");
         // 键的序列化器（将 String 序列化为字节数组）
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         // 值的序列化器
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        // 消息确认级别（-1/all 表示所有 ISR 副本确认，可靠性最高）
+        // 消息确认级别：-1/all 表示所有ISR副本确认，可靠性最高
+        // 0表示立即返回，不需要等待leader的确认
+        // 1表示等待leader持久化，如果leader挂了且没有同步到follower，则消息丢失
         props.put(ProducerConfig.ACKS_CONFIG, "all");
         // 重试次数（发送失败时）
         props.put(ProducerConfig.RETRIES_CONFIG, 3);
 
         //创建生产者实例
-        KafkaProducer<String, String> producer = new KafkaProducer<>(props);
 
-        try {
+        try (KafkaProducer<String, String> producer = new KafkaProducer<>(props)) {
             //发送消息（主题：quickstart-events，键：key-1，值：消息内容）
             for (int i = 0; i < 5; i++) {
                 String key = "key-" + i;
                 String value = "Hello Kafka! This is message " + i;
                 // 创建消息记录
-                ProducerRecord<String, String> record = new ProducerRecord<>("quickstart-events", key, value);
+                ProducerRecord<String, String> record = new ProducerRecord<>(KAFKA_TOPIC, key, value);
 
                 //发送消息的三种模式
                 //1.发后即忘:只管发送消息，不关心是否成功，吞吐量最高但可靠性最低
@@ -63,11 +70,9 @@ public class KafkaProducerExample {
 
             }
         } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        } finally {
-            //释放资源
-            producer.close();
+            logger.error("kafka produce meet ex!e={}", e);
         }
+        //释放资源
     }
 
 
