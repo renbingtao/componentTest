@@ -49,12 +49,10 @@ public class KafkaConsumerExample {
 
                 // 处理消息
                 for (ConsumerRecord<String, String> record : records) {
-                    System.out.printf("接收消息 - 主题：%s，分区：%d，偏移量：%d，键：%s，值：%s%n",
-                            record.topic(), record.partition(), record.offset(),
-                            record.key(), record.value());
+                    System.out.printf("接收消息 - 主题：%s，分区：%d，偏移量：%d，键：%s，值：%s%n", record.topic(), record.partition(), record.offset(), record.key(), record.value());
                 }
                 //手动提交偏移量
-                consumer.commitSync();
+//                consumer.commitSync();
             }
         }
     }
