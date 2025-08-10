@@ -3,14 +3,16 @@ package zk;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.ZooKeeper;
+import wsl.WslIpFetcher;
 
 import java.util.concurrent.CountDownLatch;
 
 public class ZKWatcherTest2 {
 
     public static void main(String[] args) throws Exception {
+        String wslIpAddress = WslIpFetcher.getWslIpAddress();
         CountDownLatch countDownLatch = new CountDownLatch(1);
-        try (ZooKeeper zk = new ZooKeeper("localhost:2181", 3000, event -> {
+        try (ZooKeeper zk = new ZooKeeper(wslIpAddress + ":2181", 3000, event -> {
             countDownLatch.countDown();
             System.out.println("event type:" + event.getType());
         })) {

@@ -5,17 +5,18 @@ import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.recipes.locks.InterProcessMutex;
 import org.apache.curator.retry.ExponentialBackoffRetry;
+import wsl.WslIpFetcher;
 
 import java.util.concurrent.TimeUnit;
 
 public class CuratorTest {
 
     public static void main(String[] args) throws Exception {
-
+        String wslIpAddress = WslIpFetcher.getWslIpAddress();
         // 1. 初始化Curator客户端
         RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
         CuratorFramework client = CuratorFrameworkFactory.builder()
-                .connectString("localhost:2181")
+                .connectString(wslIpAddress + ":2181")
                 .retryPolicy(retryPolicy)
                 .namespace("MyApp") // 命名空间隔离
                 .build();
